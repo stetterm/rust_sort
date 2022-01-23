@@ -1,6 +1,8 @@
 use rust_sort::alg;
 use rand::Rng;
 
+pub mod link;
+
 fn main() {
     let mut test_data: Vec<i32> = vec![1, 3, 7, 16, 42, 12, 9];
     dbg!(&test_data);
