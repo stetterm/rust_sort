@@ -1,49 +1,77 @@
 pub mod link {
-    pub struct LinkedList<'a, T: Copy> {
-        head: Option<Box<Node<'a, T>>>,
-        tail: Option<&'a Node<'a, T>>,
-        singleton: bool,
+    use std::rc::Rc;
+    use std::cell::RefCell;
+
+    #[derive(Debug)]
+    pub struct LinkedList<T: Copy> {
+        head: Option<Rc<RefCell<Node<T>>>>,
+        tail: Option<Rc<RefCell<Node<T>>>>,
     }
 
-    struct Node<'a, T: Copy> {
+    #[derive(Debug)]
+    struct Node<T: Copy> {
         value: T,
-        next: Option<&'a mut Box<Node<'a, T>>>,
+        next: Option<Rc<RefCell<Node<T>>>>,
     }
 
-    impl <'a, T: Copy>LinkedList<'a, T> {
-        pub fn new() -> LinkedList<'a, T> {
+    impl <T: Copy>LinkedList<T> {
+        pub fn new() -> LinkedList<T> {
             LinkedList {
                 head: None,
                 tail: None,
-                singleton: false,
             }
         }
 
         pub fn append(&mut self, value: T) {
+            let new_node = Rc::new(RefCell::new(Node {
+                value: value,
+                next: None,
+            }));
             match self.tail {
                 None => {
-                    self.head = Some(Box::new(Node {
+                    self.head = Some(Rc::clone(&new_node));
+                    self.tail = Some(Rc::clone(&new_node));
+                },
+                Some(ref mut t) => {
+                    t.borrow_mut().next = Some(Rc::clone(&new_node));
+                    self.tail = Some(new_node);
+                },
+            }
+        }
+
+        pub fn push(&mut self, value: T) {
+            match self.head {
+                None => {
+                    let new_node = Rc::new(RefCell::new(Node {
                         value: value,
                         next: None,
                     }));
-                    // self.tail = Some();
-                    self.singleton = true;
+                    self.head = Some(Rc::clone(&new_node));
+                    self.tail = Some(Rc::clone(&new_node));
                 },
-                Some(ref mut t) => {
-                    if self.singleton {
-                        let mut new_node = Box::new(Node {
-                            value: value,
-                            next: None,
-                        });
-                        let tail_value = t.value;
-                        
-                        // self.head = Some(Box::new(Node {
-                        //     value: tail_value,
-                        //     next: Some(&mut new_node),
-                        // }));
-                    }
+                Some(ref h) => {
+                    let new_node = Rc::new(RefCell::new(Node {
+                        value: value,
+                        next: Some(Rc::clone(h)),
+                    }));
+                    self.head = Some(new_node);
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::link::*;
+
+    #[test]
+    pub fn append_values() {
+        let mut test_list: LinkedList<i32> = LinkedList::new();
+        test_list.append(45);
+        test_list.append(53);
+        test_list.append(96);
+        test_list.push(87);
+        dbg!(&test_list);
     }
 }
