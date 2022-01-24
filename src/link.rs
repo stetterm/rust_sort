@@ -14,6 +14,14 @@ pub mod link {
         next: Option<Rc<RefCell<Node<T>>>>,
     }
 
+    impl <T: Copy>Iterator for LinkedList<T> {
+        type Item = T;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.pop()
+        }
+    }
+
     impl <T: Copy>LinkedList<T> {
         pub fn new() -> LinkedList<T> {
             LinkedList {
@@ -58,6 +66,26 @@ pub mod link {
                 }
             }
         }
+
+        pub fn pop(&mut self) -> Option<T> {
+            match self.head {
+                None => None,
+                Some(ref h) => {
+                    let val = h.borrow().value;
+                    let temp = Rc::clone(&self.head.as_ref().unwrap());
+                    match temp.borrow_mut().next {
+                        None => {
+                            self.head = None;
+                            self.tail = None;
+                        },
+                        Some(ref mut n) => {
+                            self.head = Some(Rc::clone(n));
+                        },
+                    }
+                    Some(val)
+                },
+            }
+        }
     }
 }
 
@@ -72,6 +100,9 @@ pub mod tests {
         test_list.append(53);
         test_list.append(96);
         test_list.push(87);
+        let test_list: Vec<i32> = test_list.into_iter().map(|n| {
+            n + 6
+        }).collect();
         dbg!(&test_list);
     }
 }

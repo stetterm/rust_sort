@@ -1,5 +1,4 @@
 use rust_sort::alg;
-use rand::Rng;
 
 pub mod link;
 
