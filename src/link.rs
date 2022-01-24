@@ -78,9 +78,7 @@ pub mod link {
                             self.head = None;
                             self.tail = None;
                         },
-                        Some(ref mut n) => {
-                            self.head = Some(Rc::clone(n));
-                        },
+                        Some(ref mut n) => self.head = Some(Rc::clone(n)),
                     }
                     Some(val)
                 },
