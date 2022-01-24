@@ -1,7 +1,7 @@
 pub mod link {
     pub struct LinkedList<'a, T: Copy> {
         head: Option<Box<Node<'a, T>>>,
-        tail: Option<Box<Node<'a, T>>>,
+        tail: Option<&'a Node<'a, T>>,
         singleton: bool,
     }
 
@@ -22,11 +22,11 @@ pub mod link {
         pub fn append(&mut self, value: T) {
             match self.tail {
                 None => {
-                    self.head = None;
-                    self.tail = Some(Box::new(Node {
+                    self.head = Some(Box::new(Node {
                         value: value,
                         next: None,
                     }));
+                    // self.tail = Some();
                     self.singleton = true;
                 },
                 Some(ref mut t) => {
