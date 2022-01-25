@@ -97,6 +97,10 @@ pub mod link {
             return cur.borrow().value;
         }
 
+        pub fn len(&self) -> usize {
+            return self.size as usize;
+        }
+
         pub fn pop(&mut self) -> Option<T> {
             match self.head {
                 None => None,
@@ -136,6 +140,8 @@ pub mod link {
             }
             self.size += 1;
         }
+
+        // TODO: remove(), drop()
     }
 }
 
@@ -160,5 +166,7 @@ pub mod tests {
         test_list.add(95, 6);
         let test_list: Vec<i32> = test_list.into_iter().collect();
         dbg!(&test_list);
+        dbg!(&test_list.get(0));
+        dbg!(&test_list.len());
     }
 }
