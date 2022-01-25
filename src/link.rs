@@ -1,6 +1,5 @@
 pub mod link {
     use std::cell::RefCell;
-    use std::fmt;
     use std::iter::FromIterator;
     use std::rc::Rc;
 
@@ -54,7 +53,7 @@ pub mod link {
             }
             let mut prev = Rc::clone(self.head.as_mut().unwrap());
             let mut cur = Rc::clone((*self.head.as_mut().unwrap()).borrow_mut().next.as_mut().unwrap());
-            for i in 1..index {
+            for _ in 1..index {
                 prev = Rc::clone(&cur);
                 cur = Rc::clone(&prev.borrow_mut().next.as_mut().unwrap());
             }
