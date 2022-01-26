@@ -226,7 +226,7 @@ pub mod alg {
     }
 
     pub fn tree_sort<T: PartialOrd + Ord + Copy>(data: &mut [T]) {
-        let mut bst = tree::new(data[0]);
+        let mut bst = tree::Node::new(data[0]);
         for i in 1..data.len() {
             bst.add_node(data[i]);
         }

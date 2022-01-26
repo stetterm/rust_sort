@@ -6,15 +6,15 @@ pub mod tree {
         right: Option<Box<Node<T>>>,
     }
 
-    pub fn new<T: PartialOrd + Ord + Copy>(root: T) -> Node<T> {
-        Node {
-            value: root,
-            left: None,
-            right: None,
-        }
-    }
-
     impl <T: PartialOrd + Ord + Copy>Node<T> {
+        pub fn new(root: T) -> Node<T> {
+            Node {
+                value: root,
+                left: None,
+                right: None,
+            }
+        }
+
         pub fn add_node(&mut self, node: T) {
             if node <= self.value {
                 match self.left {
@@ -62,7 +62,7 @@ pub mod tests {
 
     #[test]
     pub fn make_tree() {
-        let mut test_tree = tree::new(5);
+        let mut test_tree = tree::Node::new(5);
         test_tree.add_node(7);
         test_tree.add_node(3);
         let mut out: Vec<i32> = vec![0; 3];
