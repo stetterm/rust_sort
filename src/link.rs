@@ -67,6 +67,7 @@ pub mod link {
                 next: Some(cur),
             }));
             prev.borrow_mut().next = Some(Rc::clone(&new_node));
+            self.size += 1;
         }
 
         pub fn append(&mut self, value: T) {
@@ -157,12 +158,27 @@ pub mod link {
                 cur = Rc::clone(&prev.borrow_mut().next.as_mut().unwrap());
             }
             let ret_val = cur.borrow().value;
-            prev.borrow_mut().next = Some(Rc::clone(&cur.borrow().next.as_ref().unwrap()));
+            prev.borrow_mut().next = match &cur.borrow().next {
+                None => {
+                    prev.borrow_mut().next = None;
+                    self.tail = Some(prev);
+                    self.size -= 1;
+                    return Ok(ret_val);
+                },
+                Some(val) => {
+                    Some(Rc::clone(val))
+                },
+            };
             self.size -= 1;
             return Ok(ret_val);
         }
 
-        // TODO: drop()
+        pub fn pull(&mut self) -> Result<T> {
+            if self.size == 0 {
+                return Err(IndexError);
+            }
+            return self.remove((self.size as usize) - 1);
+        }
     }
 }
 
@@ -185,11 +201,12 @@ pub mod tests {
         dbg!(&test_list);
         test_list.add(16, 2);
         test_list.add(95, 6);
-        let mut test_list: Vec<i32> = test_list.into_iter().collect();
         dbg!(&test_list);
         dbg!(&test_list.get(0));
         dbg!(&test_list.len());
         dbg!(&test_list.remove(2));
+        dbg!(&test_list);
+        dbg!(&test_list.pull());
         dbg!(&test_list);
     }
 }
