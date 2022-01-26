@@ -34,6 +34,11 @@ pub mod link {
         }
     }
 
+    pub type Result<T> = std::result::Result<T, IndexError>;
+
+    #[derive(Debug, Clone)]
+    pub struct IndexError;
+
     impl <T: Copy>LinkedList<T> {
         pub fn new() -> LinkedList<T> {
             LinkedList {
@@ -82,11 +87,11 @@ pub mod link {
             self.size += 1;
         }
 
-        pub fn get(&self, index: usize) -> T {
+        pub fn get(&self, index: usize) -> Result<T> {
             if index >= self.size as usize {
                 match &self.head {
-                    Some(val) => return val.borrow().value,
-                    None => panic!("Empty list!"),
+                    Some(val) => return Ok(val.borrow().value),
+                    None => return Err(IndexError),
                 };
             }
             let mut cur = Rc::clone(self.head.as_ref().unwrap());
@@ -94,7 +99,7 @@ pub mod link {
                 let temp = Rc::clone(&cur);
                 cur = Rc::clone(&temp.borrow().next.as_ref().unwrap());
             }
-            return cur.borrow().value;
+            return Ok(cur.borrow().value);
         }
 
         pub fn len(&self) -> usize {
@@ -141,7 +146,23 @@ pub mod link {
             self.size += 1;
         }
 
-        // TODO: remove(), drop()
+        pub fn remove(&mut self, index: usize) -> Result<T> {
+            if index >= self.size as usize {
+                return Err(IndexError);
+            }
+            let mut prev = Rc::clone(&self.head.as_mut().unwrap());
+            let mut cur = Rc::clone(&self.head.as_mut().unwrap().borrow_mut().next.as_mut().unwrap());
+            for _ in 1..index {
+                prev = Rc::clone(&cur);
+                cur = Rc::clone(&prev.borrow_mut().next.as_mut().unwrap());
+            }
+            let ret_val = cur.borrow().value;
+            prev.borrow_mut().next = Some(Rc::clone(&cur.borrow().next.as_ref().unwrap()));
+            self.size -= 1;
+            return Ok(ret_val);
+        }
+
+        // TODO: drop()
     }
 }
 
@@ -164,9 +185,11 @@ pub mod tests {
         dbg!(&test_list);
         test_list.add(16, 2);
         test_list.add(95, 6);
-        let test_list: Vec<i32> = test_list.into_iter().collect();
+        let mut test_list: Vec<i32> = test_list.into_iter().collect();
         dbg!(&test_list);
         dbg!(&test_list.get(0));
         dbg!(&test_list.len());
+        dbg!(&test_list.remove(2));
+        dbg!(&test_list);
     }
 }
