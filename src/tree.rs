@@ -6,6 +6,20 @@ pub mod tree {
         right: Option<Box<Node<T>>>,
     }
 
+    impl <T: PartialOrd + Ord + Copy>FromIterator<T> for Node<T> {
+        fn from_iter<I: IntoIterator<Item=T>>(iter: I) -> Node<T> {
+            let mut data: Vec<T> = Vec::new();
+            for i in iter {
+                data.push(i);
+            }
+            let mut new_bst: Node<T> = Node::new(*data.get(0).unwrap());
+            for value in data.iter() {
+                new_bst.add_node(*value);
+            }
+            new_bst
+        }
+    }
+
     impl <T: PartialOrd + Ord + Copy>Node<T> {
         pub fn new(root: T) -> Node<T> {
             Node {
