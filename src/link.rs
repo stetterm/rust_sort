@@ -1,3 +1,12 @@
+macro_rules! link {
+    () => { LinkedList::new() };
+    ($($elem : expr),+) => {{
+        let mut new = link![];
+        $( new.append($elem); )*
+        new
+    }};
+}
+
 pub mod link {
     use std::cell::RefCell;
     use std::iter::FromIterator;
@@ -208,5 +217,18 @@ pub mod tests {
         dbg!(&test_list);
         dbg!(&test_list.pull());
         dbg!(&test_list);
+    }
+
+    #[test]
+    pub fn macro_test() {
+        let mut x = link![];
+        x.append(5);
+        assert_eq!(5, x.get(0).unwrap());
+
+        x = link![1, 5, 1, 8];
+        assert_eq!(1, x.get(0).unwrap());
+        assert_eq!(5, x.get(1).unwrap());
+        assert_eq!(1, x.get(2).unwrap());
+        assert_eq!(8, x.get(3).unwrap());
     }
 }
