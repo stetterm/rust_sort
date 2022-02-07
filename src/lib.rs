@@ -3,6 +3,10 @@ pub mod tree;
 pub mod alg {
     use rand::Rng;
     use std::cmp::Ordering;
+    use std::sync::Arc;
+    use std::sync::RwLock;
+    use std::thread;
+    use std::thread::JoinHandle;
 
     pub use crate::tree::tree;
 
@@ -131,10 +135,37 @@ pub mod alg {
         largest
     }
 
-    pub fn tim_sort<T: PartialOrd + Ord + Copy>(data: &mut [T], n: usize) {
+    pub fn tim_sort(data: &mut [i32], n: usize) {
         let length = data.len();
+        let mut data_cpy = vec![];
+        for value in data.iter() {
+            data_cpy.push(*value);
+        }
+        let mut join_handles: Vec<JoinHandle<()>> = vec![];
+        let thread_cpy = Arc::new(RwLock::new(data_cpy));
         for i in (0..length).step_by(n) {
-            insertion_sort(&mut data[i..min(i+n, length)]);
+            let local_cpy = Arc::clone(&thread_cpy);
+            join_handles.push(thread::spawn(move || {
+                let mut slice_copy: Vec<i32> = vec![];
+                {
+                let read_from_mutex = local_cpy.read().unwrap();
+                for j in i..min(i+n, length) {
+                    slice_copy.push(read_from_mutex[j]);
+                }
+                }
+                insertion_sort(&mut slice_copy[..]);
+                {
+                let mut write_to_mutex = local_cpy.write().unwrap();
+                let mut count = 0;
+                for j in (i..min(i+n, length)) {
+                    write_to_mutex[j] = slice_copy[count];
+                    count += 1;
+                }
+                }
+            }));
+        }
+        for handle in join_handles {
+            handle.join().unwrap();
         }
 
         let mut size = n;
@@ -143,10 +174,15 @@ pub mod alg {
                 let mid = left + size - 1;
                 let right = min(left + 2 * size - 1, length - 1);
                 if mid < right {
-                    merge(data, left, mid, right);
+                    merge(&mut thread_cpy.write().unwrap(), left, mid, right);
                 }
             }
             size *= 2;
+        }
+
+        let read_from_mutex = thread_cpy.read().unwrap();
+        for i in 0..data.len() {
+            data[i] = read_from_mutex[i];
         }
     }
 
@@ -200,7 +236,9 @@ pub mod alg {
             while data[i] < data[insert_index] && insert_index > 0 {
                 insert_index -= 1;
             }
-            insert_index += 1;
+            if insert_index != 0 {
+                insert_index += 1;
+            }
             let temp = data[i];
             for j in 0..i-insert_index {
                 data[i-j] = data[i-j-1];
