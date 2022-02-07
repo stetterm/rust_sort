@@ -1,6 +1,6 @@
 macro_rules! link {
     () => { LinkedList::new() };
-    ($($elem : expr),+) => {{
+    ($($elem : expr),+ $(,)*) => {{
         let mut new = link![];
         $( new.append($elem); )*
         new

@@ -157,7 +157,7 @@ pub mod alg {
                 {
                 let mut write_to_mutex = local_cpy.write().unwrap();
                 let mut count = 0;
-                for j in (i..min(i+n, length)) {
+                for j in i..min(i+n, length) {
                     write_to_mutex[j] = slice_copy[count];
                     count += 1;
                 }
