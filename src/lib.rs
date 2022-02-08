@@ -86,19 +86,21 @@ pub mod alg {
         }
     }
 
-    pub fn radix_sort(data: &mut [usize], base: usize) {
+    const BASE: usize = 64;
+
+    pub fn radix_sort(data: &mut [usize]) {
         let mut copy: Vec<usize> = vec![0; data.len()];
-        let mut count: Vec<usize> = vec![0; base];
+        let mut count: Vec<usize> = vec![0; BASE];
         let largest_value: usize = largest(&data);
         for i in 0..dig_count(largest_value) {
             for value in data.iter() {
-                let divided: usize = value / (base.pow(i));
-                count[divided % base] += 1;
+                let divided: usize = value / (BASE.pow(i));
+                count[divided % BASE] += 1;
             }
             prefix_sum(&mut count);
             for j in 1..data.len()+1 {
                 let index = data.len() - j;
-                let remainder = (data[index] / (base.pow(i))) % base;
+                let remainder = (data[index] / (BASE.pow(i))) % BASE;
                 count[remainder] -= 1;
                 copy[count[remainder]] = data[index];
             }
@@ -139,10 +141,8 @@ pub mod alg {
 
     pub fn tim_sort(data: &mut [i64]) {
         let length = data.len();
-        let mut data_cpy = vec![];
-        for value in data.iter() {
-            data_cpy.push(*value);
-        }
+        let mut data_cpy = vec![*data.get(0).unwrap(); data.len()];
+        data_cpy.clone_from_slice(&data[..]);
         let mut join_handles: Vec<JoinHandle<()>> = vec![];
         let thread_cpy = Arc::new(RwLock::new(data_cpy));
         for i in (0..length).step_by(TIM_SORT_BLOCK_SIZE) {
@@ -386,7 +386,7 @@ mod tests {
         for i in 0..100 {
             test_data.push(100 - i);
         }
-        alg::radix_sort(&mut test_data, 10);
+        alg::radix_sort(&mut test_data);
         assert_eq!(true, alg::is_sorted(&test_data));
     }
 
@@ -396,7 +396,7 @@ mod tests {
         for _ in 0..100 {
             test_data.push(rand::thread_rng().gen_range(0..10000));
         }
-        alg::radix_sort(&mut test_data, 10);
+        alg::radix_sort(&mut test_data);
         assert_eq!(true, alg::is_sorted(&test_data));
     }
 
@@ -406,7 +406,7 @@ mod tests {
         for _ in 0..1_000_000 {
             test_data.push(rand::thread_rng().gen_range(0..10_000_000));
         }
-        alg::radix_sort(&mut test_data, 10);
+        alg::radix_sort(&mut test_data);
         assert_eq!(true, alg::is_sorted(&test_data));
     }
 

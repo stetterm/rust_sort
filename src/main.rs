@@ -5,7 +5,7 @@ use rust_sort::alg;
 
 pub mod link;
 
-const NUM_ELEMENTS: usize = 10_000;
+const NUM_ELEMENTS: usize = 100_000;
 const NUM_TRIALS: u128 = 10;
 const MIN_VALUE: i64 = -100_000;
 const MAX_VALUE: i64 = 100_000;
@@ -74,13 +74,42 @@ fn main() {
         data.clone_from_slice(&data_cpy[..]);
     }
 
-    println!("\nSelection Sort avg:\t{}\nMerge Sort avg:\t\t{}\nQuick Sort avg:\t\t{}\nTim Sort avg:\t\t{}\nTree Sort avg:\t\t{}\n",
+    println!("\nSelection Sort avg:\t{}\n\
+            Merge Sort avg:\t\t{}\n\
+            Quick Sort avg:\t\t{}\n\
+            Tim Sort avg:\t\t{}\n\
+            Tree Sort avg:\t\t{}\n",
         sel_total/NUM_TRIALS,
         mer_total/NUM_TRIALS,
         quick_total/NUM_TRIALS,
         tim_total/NUM_TRIALS,
         tree_total/NUM_TRIALS,
     );
+
+    println!("Starting Radix Sort tests\n");
+
+    let mut radix_data: Vec<usize> = vec![];
+    let mut new_val: usize;
+
+    let mut radix_total = 0;
+
+    for _ in 0..NUM_TRIALS {
+        for _ in 0..NUM_ELEMENTS {
+            new_val = rand::thread_rng().gen_range(0..MAX_VALUE) as usize;
+            radix_data.push(new_val);
+        }
+
+        let res_time = time_sort(alg::radix_sort, &mut radix_data[..]);
+        assert!(alg::is_sorted(&radix_data));
+        println!("Radix Sort took ~{} milliseconds to complete",
+            res_time,
+        );
+        radix_total += res_time;
+
+        radix_data = vec![];
+    }
+
+    println!("\nRadix Sort avg: {}\n", radix_total/NUM_TRIALS);
 }
 
 fn time_sort<T: FnMut(&mut [D]) -> (), D: PartialOrd + Ord + Copy>(mut sort_alg: T, data: &mut [D]) -> u128 {
