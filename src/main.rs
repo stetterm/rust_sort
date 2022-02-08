@@ -116,6 +116,5 @@ fn time_sort<T: FnMut(&mut [D]) -> (), D: PartialOrd + Ord + Copy>(mut sort_alg:
     let start_time = Instant::now();
     sort_alg(data);
     let elapsed = start_time.elapsed();
-    assert!(alg::is_sorted(data));
     elapsed.as_millis()
 }
