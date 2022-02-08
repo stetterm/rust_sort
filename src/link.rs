@@ -1,13 +1,15 @@
-macro_rules! link {
+macro_rules! linkd {
     () => { LinkedList::new() };
     ($($elem : expr),+ $(,)*) => {{
-        let mut new = link![];
+        let mut new = linkd![];
         $( new.append($elem); )*
         new
     }};
 }
 
-pub mod link {
+pub(crate) use linkd;
+
+pub mod l {
     use std::cell::RefCell;
     use std::iter::FromIterator;
     use std::rc::Rc;
@@ -193,7 +195,7 @@ pub mod link {
 
 #[cfg(test)]
 pub mod tests {
-    use super::link::*;
+    use super::l::*;
 
     #[test]
     pub fn append_values() {
@@ -221,11 +223,11 @@ pub mod tests {
 
     #[test]
     pub fn macro_test() {
-        let mut x = link![];
+        let mut x = linkd![];
         x.append(5);
         assert_eq!(5, x.get(0).unwrap());
 
-        x = link![1, 5, 1, 8];
+        x = linkd![1, 5, 1, 8];
         assert_eq!(1, x.get(0).unwrap());
         assert_eq!(5, x.get(1).unwrap());
         assert_eq!(1, x.get(2).unwrap());

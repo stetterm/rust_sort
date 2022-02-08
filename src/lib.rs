@@ -135,7 +135,9 @@ pub mod alg {
         largest
     }
 
-    pub fn tim_sort(data: &mut [i32], n: usize) {
+    const TIM_SORT_BLOCK_SIZE: usize = 64;
+
+    pub fn tim_sort(data: &mut [i64]) {
         let length = data.len();
         let mut data_cpy = vec![];
         for value in data.iter() {
@@ -143,21 +145,21 @@ pub mod alg {
         }
         let mut join_handles: Vec<JoinHandle<()>> = vec![];
         let thread_cpy = Arc::new(RwLock::new(data_cpy));
-        for i in (0..length).step_by(n) {
+        for i in (0..length).step_by(TIM_SORT_BLOCK_SIZE) {
             let local_cpy = Arc::clone(&thread_cpy);
             join_handles.push(thread::spawn(move || {
-                let mut slice_copy: Vec<i32> = vec![];
+                let mut slice_copy: Vec<i64> = vec![];
                 {
                 let read_from_mutex = local_cpy.read().unwrap();
-                for j in i..min(i+n, length) {
+                for j in i..min(i+TIM_SORT_BLOCK_SIZE, length) {
                     slice_copy.push(read_from_mutex[j]);
                 }
                 }
-                insertion_sort(&mut slice_copy[..]);
+                selection_sort(&mut slice_copy[..]);
                 {
                 let mut write_to_mutex = local_cpy.write().unwrap();
                 let mut count = 0;
-                for j in i..min(i+n, length) {
+                for j in i..min(i+TIM_SORT_BLOCK_SIZE, length) {
                     write_to_mutex[j] = slice_copy[count];
                     count += 1;
                 }
@@ -168,7 +170,7 @@ pub mod alg {
             handle.join().unwrap();
         }
 
-        let mut size = n;
+        let mut size = TIM_SORT_BLOCK_SIZE;
         while size < length {
             for left in (0..length).step_by(2 * size) {
                 let mid = left + size - 1;
@@ -236,9 +238,7 @@ pub mod alg {
             while data[i] < data[insert_index] && insert_index > 0 {
                 insert_index -= 1;
             }
-            if insert_index != 0 {
-                insert_index += 1;
-            }
+            insert_index += 1;
             let temp = data[i];
             for j in 0..i-insert_index {
                 data[i-j] = data[i-j-1];
