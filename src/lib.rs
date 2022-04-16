@@ -271,6 +271,62 @@ pub mod alg {
         bst.get_inorder(&mut data[..]);
     }
 
+    pub fn sift_down<T: PartialOrd + Ord + Copy>(data: &mut [T], index: usize) {
+        if data.len() <= 1 {
+            return;
+        }
+        let mut index = index;
+        let mut swap_index = index;
+        let mut temp: T = data[0];
+        let mut swap = 
+            move |data: &mut [T], i1: usize, i2: usize| {
+                temp = data[i1];
+                data[i1] = data[i2];
+                data[i2] = temp;
+        };
+        loop {
+            swap_index = 2 * swap_index + 1;
+            if swap_index >= data.len() {
+                break;
+            }
+            if swap_index + 1 == data.len() {
+                if data[swap_index] > data[index] {
+                    swap(data, index, swap_index);
+                    index = swap_index;
+                } else {
+                    break;
+                }
+            } else {
+                if data[swap_index] > data[swap_index + 1] {
+                    if data[swap_index] > data[index] {
+                        swap(data, index, swap_index);
+                        index = swap_index;
+                    } else {
+                        break;
+                    }
+                } else {
+                    if data[swap_index + 1] > data[index] {
+                        swap(data, index, swap_index + 1);
+                        index = swap_index + 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    fn heapify<T: PartialOrd + Ord + Copy>(data: &mut [T]) {
+        let mut index = (data.len() - 2) / 2;
+        loop {
+            sift_down(&mut data[..], index);
+            if index == 0 {
+                break;
+            }
+            index -= 1;
+        }
+    }
+
     pub fn is_sorted<T: PartialOrd + Ord + Copy>(list: &[T]) -> bool {
         for i in 0..list.len()-1 {
             if let Ordering::Greater = list[i].cmp(&list[i+1]) {
@@ -283,6 +339,8 @@ pub mod alg {
 
 #[cfg(test)]
 mod tests {
+    use crate::alg::sift_down;
+
     use super::*;
     use rand::Rng;
 
@@ -472,5 +530,18 @@ mod tests {
         }
         alg::selection_sort(&mut test_data[..]);
         assert_eq!(true, alg::is_sorted(&test_data[..]));
+    }
+
+    #[test]
+    fn sift_down_small() {
+        let mut test_data = vec![
+            2, 6, 5, 8
+        ];
+        sift_down(&mut test_data, 1);
+        assert_eq!(&vec![2, 8, 5, 6], &test_data);
+        dbg!(&test_data);
+        sift_down(&mut test_data, 0);
+        assert_eq!(&vec![8, 6, 5, 2], &test_data);
+        dbg!(&test_data);
     }
 }
