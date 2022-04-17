@@ -20,6 +20,7 @@ fn main() {
     let mut quick_total: u128 = 0;
     let mut tim_total: u128 = 0;
     let mut tree_total: u128 = 0;
+    let mut heap_total: u128 = 0;
 
     for _ in 0..NUM_TRIALS {
         for _ in 0..NUM_ELEMENTS {
@@ -72,18 +73,27 @@ fn main() {
         );
         tree_total += res_time;
         data.clone_from_slice(&data_cpy[..]);
+
+        let res_time = time_sort(alg::heap_sort, &mut data[..]);
+        assert!(alg::is_sorted(&data));
+        println!("Heap Sort took ~{} milliseconds to complete",
+            res_time,
+        );
+        heap_total += res_time;
     }
 
     println!("\nSelection Sort avg:\t{}\n\
             Merge Sort avg:\t\t{}\n\
             Quick Sort avg:\t\t{}\n\
             Tim Sort avg:\t\t{}\n\
-            Tree Sort avg:\t\t{}\n",
+            Tree Sort avg:\t\t{}\n\
+            Heap Sort avg: \t\t{}\n",
         sel_total/NUM_TRIALS,
         mer_total/NUM_TRIALS,
         quick_total/NUM_TRIALS,
         tim_total/NUM_TRIALS,
         tree_total/NUM_TRIALS,
+        heap_total/NUM_TRIALS,
     );
 
     println!("Starting Radix Sort tests\n");

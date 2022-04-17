@@ -285,7 +285,7 @@ pub mod alg {
                 data[i2] = temp;
         };
         loop {
-            swap_index = 2 * swap_index + 1;
+            swap_index = 2 * index + 1;
             if swap_index >= data.len() {
                 break;
             }
@@ -316,7 +316,18 @@ pub mod alg {
         }
     }
 
-    fn heapify<T: PartialOrd + Ord + Copy>(data: &mut [T]) {
+    pub fn is_heap<T: PartialOrd + Ord + Copy>(data: &[T]) -> bool {
+        for i in 0..(data.len()-2)/2+1 {
+            if data[i] < data[2*i+1] {
+                return false;
+            } else if 2*i+2 < data.len() && data[i] < data[2*i+2] {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn heapify<T: PartialOrd + Ord + Copy>(data: &mut [T]) {
         let mut index = (data.len() - 2) / 2;
         loop {
             sift_down(&mut data[..], index);
@@ -324,6 +335,20 @@ pub mod alg {
                 break;
             }
             index -= 1;
+        }
+    }
+
+    pub fn heap_sort<T: PartialOrd + Ord + Copy>(data: &mut [T]) {
+        heapify(&mut data[..]);
+        assert!(is_heap(&data));
+        let mut heap_size = data.len();
+        let mut temp: T;
+        while heap_size > 1 {
+            temp = data[0];
+            data[0] = data[heap_size-1];
+            data[heap_size-1] = temp;
+            heap_size -= 1;
+            sift_down(&mut data[..heap_size], 0);
         }
     }
 
@@ -339,7 +364,7 @@ pub mod alg {
 
 #[cfg(test)]
 mod tests {
-    use crate::alg::sift_down;
+    use crate::alg::{sift_down, heap_sort, heapify};
 
     use super::*;
     use rand::Rng;
@@ -543,5 +568,15 @@ mod tests {
         sift_down(&mut test_data, 0);
         assert_eq!(&vec![8, 6, 5, 2], &test_data);
         dbg!(&test_data);
+    }
+
+    #[test]
+    fn heap_backwards_from_100() {
+        let mut test_data = Vec::with_capacity(100);
+        for _ in 0..100 {
+            test_data.push(rand::thread_rng().gen_range(0..10000));
+        }
+        alg::heap_sort(&mut test_data[..]);
+        assert!(alg::is_sorted(&test_data));
     }
 }
